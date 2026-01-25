@@ -1,0 +1,6 @@
+node_modules
+.env
+logs
+.env.local
+public/text/errLog.txt
+*.log
