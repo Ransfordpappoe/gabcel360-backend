@@ -79,14 +79,14 @@ const addNewSingleSales = async (req, res) => {
     //update worker total sales with new sales amount
     let newSales = 0;
     const prevSales = workersnapshot.child("totalSales").val();
-    console.log("prevSales", prevSales);
+    //console.log("prevSales", prevSales);
 
     if (prevSales && prevSales !== "") {
       newSales = prevSales + amountOwing;
     } else {
       newSales = amountOwing;
     }
-    console.log(`newSales = ${newSales}, newDebt = ${newDebt}`);
+    //console.log(`newSales = ${newSales}, newDebt = ${newDebt}`);
     worker_ref.update({ totalSales: newSales });
 
     const salesId = generateSalesId();
@@ -116,7 +116,6 @@ const addNewSingleSales = async (req, res) => {
       success: `sales registration completed successfully ✔️`,
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -252,4 +251,203 @@ const addMultipleSales = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
-module.exports = { addNewSingleSales, addMultipleSales };
+
+const deleteSales = async (req, res) => {
+  const {
+    customerId,
+    salesId,
+    amountOwing,
+    workerName,
+    workerDomain,
+    adminDomain,
+  } = req.body;
+
+  if (
+    !customerId ||
+    !salesId ||
+    !workerDomain ||
+    !adminDomain ||
+    !amountOwing
+  ) {
+    return res
+      .status(400)
+      .json({ message: "important product information is missing" });
+  }
+
+  try {
+    const purifyWorkerDomain = sanitizeEmail(workerDomain).toLocaleLowerCase();
+    const purifyAdminDomain = sanitizeEmail(adminDomain).toLocaleLowerCase();
+    const salesRef = db.ref(`sales/${customerId}/${salesId}`);
+    const salesSnapshot = await salesRef.once("value");
+    if (!salesSnapshot.exists()) {
+      return res.status(404).json({ message: "Item does not exist" });
+    }
+    const worker_ref = db.ref(
+      `worker/${purifyAdminDomain}/${purifyWorkerDomain}`,
+    );
+    const customersRef = db.ref(
+      `customers/${purifyWorkerDomain}/${customerId}`,
+    );
+    const workersnapshot = await worker_ref.once("value");
+    if (!workersnapshot.exists()) {
+      return res.status(404).json({
+        message:
+          "You are not permitted to delete this product. REASON: user not found. cross check your login credential or contact your manager.",
+      });
+    }
+
+    const customerSnapshot = await customersRef.once("value");
+    if (!customerSnapshot.exists()) {
+      return res.status(404).json({
+        message:
+          "You are not permitted to delete this product. REASON: Customer not found. Contact your manager to verify the customer details",
+      });
+    }
+
+    await salesRef.remove();
+
+    //update customers debt figure with deleted sales amount
+    let newDebt = 0;
+    const prevDebt = customerSnapshot.child("amountOwing").val();
+    if (prevDebt && prevDebt !== "" && prevDebt > amountOwing) {
+      newDebt = prevDebt - amountOwing;
+    } else {
+      newDebt = amountOwing;
+    }
+    customersRef.update({ amountOwing: newDebt });
+
+    //update worker total sales with deleted sales amount
+    let newSales = 0;
+    const prevSales = workersnapshot.child("totalSales").val();
+    console.log("prevSales", prevSales);
+
+    if (prevSales && prevSales !== "" && prevSales > amountOwing) {
+      newSales = prevSales - amountOwing;
+    } else {
+      newSales = amountOwing;
+    }
+    console.log(`newSales = ${newSales}, newDebt = ${newDebt}`);
+    worker_ref.update({ totalSales: newSales });
+
+    return res.status(201).json({
+      success: `Product successfully deleted`,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+const deleteMultipleSales = async (req, res) => {
+  const { sales, workerName, workerDomain, adminDomain, customerId } = req.body;
+
+  if (!workerDomain || !adminDomain || !customerId || !workerName) {
+    return res.status(400).json({
+      message:
+        "Failed to delete product. REASON: missing important worker or customer credential",
+    });
+  }
+
+  try {
+    const purifyWorkerDomain = sanitizeEmail(workerDomain).toLocaleLowerCase();
+    const purifyAdminDomain = sanitizeEmail(adminDomain).toLocaleLowerCase();
+
+    const worker_ref = db.ref(
+      `worker/${purifyAdminDomain}/${purifyWorkerDomain}`,
+    );
+    const customersRef = db.ref(
+      `customers/${purifyWorkerDomain}/${customerId}`,
+    );
+    const workersnapshot = await worker_ref.once("value");
+    if (!workersnapshot.exists()) {
+      return res.status(404).json({
+        message:
+          "You are not permitted to delete this product. REASON: user not found. cross check your login credential or contact your manager.",
+      });
+    }
+
+    const customerSnapshot = await customersRef.once("value");
+    if (!customerSnapshot.exists()) {
+      return res.status(404).json({
+        message:
+          "You are not permitted to delete this product. REASON: Customer not found. Contact your manager to verify the customer details",
+      });
+    }
+
+    const validSales = [];
+    const failedSales = [];
+    const deletedSales = [];
+    let totalAmountToRemove = 0;
+
+    for (const sale of sales) {
+      const { salesId, amountOwing } = sale;
+      if (!amountOwing || !salesId) {
+        failedSales.push({
+          sale,
+          reason: "important product information is missing",
+        });
+        continue;
+      }
+      validSales.push(sale);
+    }
+
+    // Wait for all deletions to complete before proceeding
+    const deletePromises = validSales.map(async (sale) => {
+      const { salesId } = sale;
+      const salesRef = db.ref(`sales/${customerId}/${salesId}`);
+      const salesSnapshot = await salesRef.once("value");
+
+      try {
+        if (!salesSnapshot.exists()) {
+          failedSales.push({
+            sale,
+            reason: "Item does not exist on server",
+          });
+          return;
+        }
+        await salesRef.remove();
+        deletedSales.push(sale);
+      } catch (err) {
+        failedSales.push({
+          sale,
+          reason: "failed to delete sales",
+        });
+        console.error(err);
+      }
+    });
+
+    await Promise.all(deletePromises);
+
+    for (const sale of deletedSales) {
+      const { amountOwing } = sale;
+      totalAmountToRemove += amountOwing;
+    }
+    console.log("Total amount to remove = ", totalAmountToRemove);
+
+    // Update customer debt and worker sales only once with accumulated totals
+    const prevDebt = customerSnapshot.child("amountOwing").val() || 0;
+    if (prevDebt > totalAmountToRemove) {
+      const newDebt = prevDebt - totalAmountToRemove;
+      customersRef.update({ amountOwing: newDebt });
+    }
+
+    const prevSales = workersnapshot.child("totalSales").val() || 0;
+    if (prevSales > totalAmountToRemove) {
+      const newTotalSales = prevSales - totalAmountToRemove;
+      worker_ref.update({ totalSales: newTotalSales });
+    }
+
+    return res.status(201).json({
+      success: `${deletedSales.length} sales deleted successfully ✔️`,
+      deletedSales,
+      ...(failedSales.length > 0 && { failedSales }),
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+module.exports = {
+  addNewSingleSales,
+  addMultipleSales,
+  deleteSales,
+  deleteMultipleSales,
+};
