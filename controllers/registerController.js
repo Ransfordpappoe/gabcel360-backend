@@ -4,11 +4,10 @@ const { sanitizeEmail, sanitizeText } = require("../utils/sanitizeText");
 const { generateMangerRef } = require("../utils/generateRandomDigits");
 
 const handleCreateAdminAccount = async (req, res) => {
-  const { adminName, adminEmail, adminSecret, password, api_key } = req.body;
-  if (!adminName || !adminEmail || !password) {
-    return res
-      .status(400)
-      .json({ message: "admin Name, email and password are required" });
+  const { adminName, adminEmail, adminSecret, password, contact, api_key } =
+    req.body;
+  if (!adminName || !adminEmail || !password || !contact) {
+    return res.status(400).json({ message: "all fields are required" });
   }
   const gabcel_api_key = process.env.GABCEL_API_KEY;
 
@@ -40,6 +39,7 @@ const handleCreateAdminAccount = async (req, res) => {
       adminEmail,
       adminDomain,
       managerRef,
+      contact,
       password: encryptedPwd,
     });
     addAdminToWorkerList(
@@ -50,6 +50,7 @@ const handleCreateAdminAccount = async (req, res) => {
       adminDomain,
       managerRef,
       password,
+      contact,
       res,
     );
   } catch (error) {
@@ -65,6 +66,7 @@ const addAdminToWorkerList = async (
   adminDomain,
   managerRef,
   password,
+  contact,
   res,
 ) => {
   const user_ref = db.ref(`worker/${purifyAdminDomain}/${purifyWorkerDomain}`);
@@ -81,18 +83,19 @@ const addAdminToWorkerList = async (
     branch: "manager",
     isAdmin: true,
     managerRef,
+    contact,
     password: encryptedPwd,
   });
   return res.status(201).json({
-    success: `Account for ${workerName} is created`,
-    workerDomain,
-    managerRef,
+    success: `Admin Account for ${workerName} is created.\n\nworker domain: ${workerDomain} \nadmin domain: ${adminDomain} \nname: ${workerName} \ncontact: ${contact} \nbranches: all \nmanager reference: ${managerRef} \nencrypted password: ${encryptedPwd} \n\nAs an admin your worker domain is the same as your admin domain. Your password is encrypted and no one can retrieve it not even the creators of the gabcel platform. Make sure you write it down in a safe place for future memory. If you ever forget your password, you can use your manager ref to sign in.`,
+    contact,
   });
 };
 
 const handleCreateWorkerAccount = async (req, res) => {
-  const { workerName, password, adminDomain, branch, api_key } = req.body;
-  if (!workerName || !adminDomain || !password) {
+  const { workerName, password, adminDomain, branch, contact, api_key } =
+    req.body;
+  if (!workerName || !adminDomain || !password || !contact) {
     return res
       .status(400)
       .json({ message: "worker Name and password are required" });
@@ -128,6 +131,7 @@ const handleCreateWorkerAccount = async (req, res) => {
 
         await worker_ref.set({
           workerName,
+          contact,
           workerDomain,
           totalSales: 0,
           adminDomain: adminDomainLowerCase,
@@ -137,8 +141,8 @@ const handleCreateWorkerAccount = async (req, res) => {
           password: encryptedPwd,
         });
         return res.status(201).json({
-          success: `Account for ${workerName} is created`,
-          workerDomain,
+          success: `worker Account for ${workerName} is created.\n\nworker domain: ${workerDomain} \nadmin domain: ${adminDomain} \nname: ${workerName} \ncontact: ${contact} \nbranch: ${branch} \nencrypted password: ${encryptedPwd} \npublic password: ${password} \n\nYour worker password is public to you and the worker you share the info with. No one else can retrieve it not even the creators of the gabcel platform. Make sure you share your worker pasword with your worker.`,
+          contact,
         });
       }
       return res.status(502).json({

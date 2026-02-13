@@ -63,6 +63,7 @@ const handleWorkerLogin = async (req, res) => {
         isAdmin: userData.isAdmin,
         adminDomain: userData.adminDomain,
         workerDomain: userData.workerDomain,
+        contact: userData.contact || 0,
       });
     }
     return res.status(401).json({ message: "invalid login credential" });
