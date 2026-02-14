@@ -67,6 +67,7 @@ const addAdminToWorkerList = async (
   managerRef,
   password,
   contact,
+  adminEmail,
   res,
 ) => {
   const user_ref = db.ref(`worker/${purifyAdminDomain}/${purifyWorkerDomain}`);
@@ -84,6 +85,7 @@ const addAdminToWorkerList = async (
     isAdmin: true,
     managerRef,
     contact,
+    adminEmail,
     password: encryptedPwd,
   });
   return res.status(201).json({
@@ -93,12 +95,26 @@ const addAdminToWorkerList = async (
 };
 
 const handleCreateWorkerAccount = async (req, res) => {
-  const { workerName, password, adminDomain, branch, contact, api_key } =
-    req.body;
-  if (!workerName || !adminDomain || !password || !contact) {
+  const {
+    workerName,
+    password,
+    adminDomain,
+    adminEmail,
+    managerRef,
+    branch,
+    contact,
+    api_key,
+  } = req.body;
+  if (!workerName || !password || !contact) {
     return res
       .status(400)
-      .json({ message: "worker Name and password are required" });
+      .json({ message: "worker Name, password, and contact are required" });
+  }
+  if (!adminDomain || !managerRef || !adminEmail) {
+    return res.status(400).json({
+      message:
+        "Failed to create worker account. REASON: Insufficient admin credentials",
+    });
   }
   const gabcel_api_key = process.env.GABCEL_API_KEY;
 
@@ -137,7 +153,8 @@ const handleCreateWorkerAccount = async (req, res) => {
           adminDomain: adminDomainLowerCase,
           branch,
           isAdmin: false,
-          managerRef,
+          adminEmail,
+          blocked: false,
           password: encryptedPwd,
         });
         return res.status(201).json({

@@ -3,8 +3,8 @@ const bcrypt = require("bcrypt");
 const { sanitizeEmail } = require("../utils/sanitizeText");
 
 const handleAdminLogin = async (req, res) => {
-  const { adminDomain, password } = req.body;
-  if (!adminDomain || !password) {
+  const { adminDomain, managerRef } = req.body;
+  if (!adminDomain || !managerRef) {
     return res.status(400).json({ message: "missing login credentials" });
   }
 
@@ -19,13 +19,17 @@ const handleAdminLogin = async (req, res) => {
     }
 
     const userData = snapshot.val();
-    const verifiedPwd = await bcrypt.compare(password, userData?.password);
+    const verifiedPwd = managerRef === userData?.managerRef;
     if (verifiedPwd) {
       return res.status(201).json({
         success: "Login successful ✔️ !!",
-        adminName: userData.adminName,
         adminEmail: userData.adminEmail,
+        workerName: userData.adminName,
+        branch: userData.branch,
+        isAdmin: userData.isAdmin,
         adminDomain: userData.adminDomain,
+        workerDomain: userData.adminDomain,
+        contact: userData.contact || 0,
       });
     }
     return res.status(401).json({ message: "invalid login credential" });
@@ -58,12 +62,13 @@ const handleWorkerLogin = async (req, res) => {
     if (verifiedPwd) {
       return res.status(201).json({
         success: "Login successful ✔️ !!",
+        adminEmail: userData.adminEmail,
         workerName: userData.workerName,
         branch: userData.branch,
         isAdmin: userData.isAdmin,
         adminDomain: userData.adminDomain,
         workerDomain: userData.workerDomain,
-        contact: userData.contact || 0,
+        contact: userData.contact || "0",
       });
     }
     return res.status(401).json({ message: "invalid login credential" });
