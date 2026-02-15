@@ -4,10 +4,20 @@ const { sanitizeEmail, sanitizeText } = require("../utils/sanitizeText");
 const { generateMangerRef } = require("../utils/generateRandomDigits");
 
 const handleCreateAdminAccount = async (req, res) => {
-  const { adminName, adminEmail, adminSecret, password, contact, api_key } =
-    req.body;
-  if (!adminName || !adminEmail || !password || !contact) {
-    return res.status(400).json({ message: "all fields are required" });
+  const {
+    adminName,
+    adminEmail,
+    adminSecret,
+    password,
+    contact,
+    branch,
+    api_key,
+  } = req.body;
+  if (!adminName || !adminEmail || !password || !contact || !branch) {
+    return res.status(400).json({
+      message:
+        "Account creation failed. Reason: some important details are missing. All fields are required",
+    });
   }
   const gabcel_api_key = process.env.GABCEL_API_KEY;
 
@@ -39,6 +49,7 @@ const handleCreateAdminAccount = async (req, res) => {
       adminEmail,
       adminDomain,
       managerRef,
+      branch,
       contact,
       password: encryptedPwd,
     });
@@ -51,6 +62,8 @@ const handleCreateAdminAccount = async (req, res) => {
       managerRef,
       password,
       contact,
+      adminEmail,
+      branch,
       res,
     );
   } catch (error) {
@@ -68,6 +81,7 @@ const addAdminToWorkerList = async (
   password,
   contact,
   adminEmail,
+  branch,
   res,
 ) => {
   const user_ref = db.ref(`worker/${purifyAdminDomain}/${purifyWorkerDomain}`);
@@ -81,15 +95,17 @@ const addAdminToWorkerList = async (
     workerName,
     workerDomain,
     adminDomain,
-    branch: "manager",
+    branch,
     isAdmin: true,
     managerRef,
     contact,
     adminEmail,
+    blocked: false,
+    edited: false,
     password: encryptedPwd,
   });
   return res.status(201).json({
-    success: `Admin Account for ${workerName} is created.\n\nworker domain: ${workerDomain} \nadmin domain: ${adminDomain} \nname: ${workerName} \ncontact: ${contact} \nbranches: all \nmanager reference: ${managerRef} \nencrypted password: ${encryptedPwd} \n\nAs an admin your worker domain is the same as your admin domain. Your password is encrypted and no one can retrieve it not even the creators of the gabcel platform. Make sure you write it down in a safe place for future memory. If you ever forget your password, you can use your manager ref to sign in.`,
+    success: `Admin Account for ${workerName} is created.\n\nworker domain: ${workerDomain} \nadmin domain: ${adminDomain} \nname: ${workerName} \n\ncontact: ${contact} \n\nbranch: ${branch} \n\nmanager reference: ${managerRef} \n\nencrypted password: ${encryptedPwd} \n\nAs an admin your worker domain is the same as your admin domain. Your password is encrypted and no one can retrieve it not even the creators of the gabcel platform. Make sure you write it down in a safe place for future memory. If you ever forget your password, you can use your manager ref to sign in.`,
     contact,
   });
 };
@@ -155,6 +171,7 @@ const handleCreateWorkerAccount = async (req, res) => {
           isAdmin: false,
           adminEmail,
           blocked: false,
+          edited: false,
           password: encryptedPwd,
         });
         return res.status(201).json({

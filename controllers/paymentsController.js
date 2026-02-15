@@ -93,7 +93,7 @@ const addPayment = async (req, res) => {
     } else {
       paymentRef.set({
         paymentId: salesId,
-        accTotal: 0,
+        accTotal: amountPaid,
         amountPaid,
         lastPmtDate: todayDate,
       });
@@ -117,7 +117,7 @@ const addPayment = async (req, res) => {
       }
     }
 
-    //update customers debt figure with deleted sales amount
+    //update customers debt figure with accumulated payment
     let newDebt = 0;
     const prevDebt = customerSnapshot.child("amountOwing").val() || 0;
     if (prevDebt > newAccTotal) {
@@ -125,16 +125,16 @@ const addPayment = async (req, res) => {
     }
     customersRef.update({ amountOwing: newDebt });
 
-    //update worker total sales with deleted sales amount
-    let newSales = 0;
-    const prevSales = workersnapshot.child("totalSales").val() || 0;
-    console.log("prevSales", prevSales);
+    //update worker total cash inflows with new amount
+    let newCashInflow = 0;
+    const prevCash = workersnapshot.child("cashinflow").val() || 0;
+    const totalSales = workersnapshot.child("totalSales").val() || 0;
 
-    if (prevSales > newAccTotal) {
-      newSales = prevSales - newAccTotal;
+    if (prevCash < totalSales) {
+      newCashInflow = prevCash + newAccTotal;
     }
-    console.log(`newSales = ${newSales}, newDebt = ${newDebt}`);
-    worker_ref.update({ totalSales: newSales });
+    console.log(`Cash inflow = ${newCashInflow}, newDebt = ${newDebt}`);
+    worker_ref.update({ cashinflow: newCashInflow });
 
     return res.status(201).json({
       success: successMessage,

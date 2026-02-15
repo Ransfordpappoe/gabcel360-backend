@@ -85,3 +85,10 @@
 20260213	23:29:25	c89e2189-2674-4eac-acc1-523e99809e5f	POST	undefined	/login/worker-login/worker-handler
 20260213	23:36:02	0428da84-4a10-4662-a0ef-1e2183698ddf	POST	undefined	/login/worker-login/worker-handler
 20260213	23:36:28	1b3a0abe-3abb-47ff-8480-e6dae33b9da1	POST	undefined	/login/worker-login/worker-handler
+20260214	15:06:40	6c54ba46-872a-41d5-9a90-1800d0a11442	POST	undefined	/signup/admin-account/admin-handler
+20260214	15:15:59	8b3db0db-273a-4a4e-8a93-600ba7dcd6c0	POST	undefined	/signup/admin-account/admin-handler
+20260214	23:06:43	121e788c-bad2-47cd-98cc-f381c67bb545	POST	undefined	/payment/add-payment/add-payment-handler
+20260214	23:09:05	cd3e3ed4-ac29-4d19-8873-4c0f46585e6d	POST	undefined	/payment/add-payment/add-payment-handler
+20260214	23:20:32	683cef1c-fd31-4f54-8dfb-51f035d5e4d8	POST	undefined	/payment/add-payment/add-payment-handler
+20260214	23:20:56	86c07be6-2115-41e1-997a-97e0c308b072	POST	undefined	/payment/add-payment/add-payment-handler
+20260214	23:26:42	4871bf78-c557-4364-852d-75ee2cc42799	POST	undefined	/payment/add-payment/add-payment-handler
