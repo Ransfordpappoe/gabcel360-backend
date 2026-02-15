@@ -126,7 +126,7 @@ const handleCreateWorkerAccount = async (req, res) => {
       .status(400)
       .json({ message: "worker Name, password, and contact are required" });
   }
-  if (!adminDomain || !managerRef || !adminEmail) {
+  if (!adminDomain || !adminEmail) {
     return res.status(400).json({
       message:
         "Failed to create worker account. REASON: Insufficient admin credentials",

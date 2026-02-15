@@ -9,7 +9,6 @@ const addPayment = async (req, res) => {
   const {
     customerId,
     salesId,
-    amountOwing,
     amountPaid,
     workerName,
     workerDomain,
@@ -22,7 +21,6 @@ const addPayment = async (req, res) => {
     !salesId ||
     !workerDomain ||
     !adminDomain ||
-    !amountOwing ||
     !amountPaid ||
     !workerName
   ) {
@@ -62,6 +60,35 @@ const addPayment = async (req, res) => {
           "You are not permitted to record customer payments for this product. REASON: Customer details not found. Contact your manager to verify the customer details",
       });
     }
+
+    const salesRef = db.ref(`sales/${customerId}/${salesId}`);
+    const salesSnapshot = await salesRef.once("value");
+
+    if (!salesSnapshot.exists()) {
+      return res.status(404).json({
+        message:
+          "You are not permitted to record customer payments for this product. REASON: Item Not Found",
+      });
+    }
+    const itemAmount = salesSnapshot.child("amountOwing").val();
+    const prevTotalPaid = salesSnapshot.child("totalPaid").val() || 0;
+    const itemName = salesSnapshot.child("productName").val() || "";
+
+    if (itemAmount <= prevTotalPaid) {
+      return res.status(401).json({
+        message: `Customer payment rejected. REASON: payment is fully done for the ${itemName} purchased and the account is closed`,
+      });
+    }
+
+    const remainingAmount = itemAmount - prevTotalPaid;
+
+    if (remainingAmount < amountPaid) {
+      const surplus = amountPaid - remainingAmount;
+      return res.status(401).json({
+        message: `Customer payment rejected. REASON: The customer is about to do over payment for the ${itemName} purchased.\n\n---Variance Analysis---\n--------------\nRemaining amount: ${remainingAmount}\nAmount paying now: ${amountPaid}\nOver Payment: ${surplus}`,
+      });
+    }
+
     const pmtHistoryId = `pmt${generateSalesId()}`;
     const paymentRef = db.ref(`payment/${customerId}/${salesId}`);
     const paymentHistoryRef = db.ref(
@@ -76,12 +103,6 @@ const addPayment = async (req, res) => {
     newAccTotal = prevAmountPaid + amountPaid;
 
     if (pmtSnapshot.exists()) {
-      if (amountOwing < newAccTotal) {
-        return res.status(409).json({
-          message:
-            "Failed to update payment. REASON: Customer has already made full Payment",
-        });
-      }
       paymentRef.update({
         accTotal: newAccTotal,
         lastPmtDate: todayDate,
@@ -103,25 +124,22 @@ const addPayment = async (req, res) => {
     paymentHistoryRef.set({
       pmtHistoryId,
       amountPaid,
+      salesId,
       paymentDate: todayDate,
       receivedBy: workerName,
     });
 
-    //TODO: REDUCE THE SALES FIGURE EITHER ON THE BACKEND OR THE FRONTEND
+    //Update THE SALES item total paid FIGURE EITHER ON THE BACKEND OR THE FRONTEND
 
-    const salesRef = db.ref(`sales/${customerId}/${salesId}`);
-    const salesSnapshot = await salesRef.once("value");
-    if (salesSnapshot.exists()) {
-      if (amountOwing >= newAccTotal) {
-        salesRef.update({ totalPaid: newAccTotal });
-      }
-    }
+    const newTotalPaid = prevTotalPaid + amountPaid;
+
+    salesRef.update({ totalPaid: newTotalPaid }); //Done on the backend for quick reference
 
     //update customers debt figure with accumulated payment
     let newDebt = 0;
     const prevDebt = customerSnapshot.child("amountOwing").val() || 0;
-    if (prevDebt > newAccTotal) {
-      newDebt = prevDebt - newAccTotal;
+    if (prevDebt > amountPaid) {
+      newDebt = prevDebt - amountPaid;
     }
     customersRef.update({ amountOwing: newDebt });
 
@@ -131,7 +149,7 @@ const addPayment = async (req, res) => {
     const totalSales = workersnapshot.child("totalSales").val() || 0;
 
     if (prevCash < totalSales) {
-      newCashInflow = prevCash + newAccTotal;
+      newCashInflow = prevCash + amountPaid;
     }
     console.log(`Cash inflow = ${newCashInflow}, newDebt = ${newDebt}`);
     worker_ref.update({ cashinflow: newCashInflow });
