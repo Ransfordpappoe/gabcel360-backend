@@ -113,7 +113,7 @@ const addNewSingleSales = async (req, res) => {
       });
 
     return res.status(201).json({
-      success: `sales registration completed successfully ✔️`,
+      success: `sales transaction completed successfully ✔️`,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -243,7 +243,7 @@ const addMultipleSales = async (req, res) => {
     }
 
     return res.status(201).json({
-      success: `${createdSales.length} sales registered successfully ✔️`,
+      success: `${createdSales.length} sales transactions completed successfully ✔️`,
       createdSales,
       ...(failedSales.length > 0 && { failedSales }),
     });
