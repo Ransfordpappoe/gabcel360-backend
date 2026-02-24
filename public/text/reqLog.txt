@@ -131,3 +131,4 @@
 20260215	17:33:58	c0b58c37-1cc0-4448-8b66-3f482286bf63	POST	undefined	/payment/add-payment/add-payment-handler
 20260215	17:35:58	10f30f01-1574-468f-a2d2-5fa25cd1aeb5	POST	undefined	/payment/add-payment/add-payment-handler
 20260215	17:37:14	579ae1a1-e1a3-4c0b-912d-87aa761f9dc9	POST	undefined	/payment/add-payment/add-payment-handler
+20260224	11:17:06	53f21720-77f0-40b6-b738-2b7f21c3d0a6	POST	undefined	/login/worker-login/worker-handler
