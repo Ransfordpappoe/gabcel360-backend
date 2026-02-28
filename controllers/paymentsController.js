@@ -3,7 +3,7 @@ const { generateSalesId } = require("../utils/generateRandomDigits");
 const { sanitizeEmail } = require("../utils/sanitizeText");
 const { format } = require("date-fns");
 
-const todayDate = format(new Date(), "dd/MM/yyyy HH:mm:ss");
+const todayDate = format(new Date(), "dd/MM/yyyy HH:mm a");
 
 const addPayment = async (req, res) => {
   const {

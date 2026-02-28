@@ -136,3 +136,14 @@
 20260224	21:34:33	ba9e9fb3-ae44-4bd7-ac75-2fcc660e9374	POST	undefined	/sales/multiple-sale/multiple-sale-handler
 20260224	21:35:37	e293ccf3-7276-484d-9bb8-0477ac8bcbab	POST	undefined	/sales/multiple-sale/multiple-sale-handler
 20260224	21:41:20	35406c0b-33b4-47dc-aca6-6ad54141f0f5	POST	undefined	/sales/multiple-sale/multiple-sale-handler
+20260227	22:43:14	98a1ce26-29f1-4d2a-b76f-960194fe1ef6	POST	undefined	/login/worker-login/worker-handler
+20260228	08:31:03	9eb7e977-7834-423a-b49e-bca95495e59d	POST	undefined	/payment/add-payment/add-payment-handler
+20260228	11:56:47	23dbc1ae-7b5b-416b-9950-0d4da5f8b049	POST	undefined	/login/worker-login/worker-handler
+20260228	11:57:05	9010020d-bf46-4431-8947-67ba8c838a41	POST	undefined	/login/worker-login/worker-handler
+20260228	11:59:45	0a00d1ad-0761-47e9-bbcc-9d2cf5c3a5c8	POST	undefined	/login/worker-login/worker-handler
+20260228	12:11:17	5403cc0f-55cf-448b-a0c6-fb2ff8711e59	POST	undefined	/login/worker-login/worker-handler
+20260228	12:12:36	f2301b61-5a65-4c28-b805-6a882d33e1d2	POST	undefined	/login/worker-login/worker-handler
+20260228	12:15:05	9033641a-f56f-4dff-8d3f-c635df3ab6b3	POST	undefined	/login/worker-login/worker-handler
+20260228	12:15:22	5cfff8f3-d642-4529-9092-0912647e750e	POST	undefined	/sales/single-sale/single-sale-handler
+20260228	12:17:19	842291e9-e11f-4a9c-aa89-69d784b6d0c7	POST	undefined	/payment/add-payment/add-payment-handler
+20260228	12:28:20	600024b5-14d1-4086-9bd2-065edefa16b7	POST	undefined	/payment/add-payment/add-payment-handler
