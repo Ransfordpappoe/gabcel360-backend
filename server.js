@@ -21,6 +21,7 @@ app.use("/login", require("./routes/api/login"));
 app.use("/customers", require("./routes/api/customers"));
 app.use("/sales", require("./routes/api/sales"));
 app.use("/payment", require("./routes/api/payments"));
+app.use("/product", require("./routes/api/products"));
 
 app.all(/^/, (req, res) => {
   res.status(404);

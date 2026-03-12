@@ -147,3 +147,12 @@
 20260228	12:15:22	5cfff8f3-d642-4529-9092-0912647e750e	POST	undefined	/sales/single-sale/single-sale-handler
 20260228	12:17:19	842291e9-e11f-4a9c-aa89-69d784b6d0c7	POST	undefined	/payment/add-payment/add-payment-handler
 20260228	12:28:20	600024b5-14d1-4086-9bd2-065edefa16b7	POST	undefined	/payment/add-payment/add-payment-handler
+20260305	11:32:55	3f548e25-c5ef-454a-af56-0349da084cc0	POST	undefined	/login/worker-login/worker-handler
+20260305	12:41:31	25ad9b44-df85-4e74-9f66-710c3d072b45	POST	undefined	/signup/worker-account/worker-handler
+20260309	14:07:38	87d70eea-8bd8-47a0-a503-58da97c42f45	POST	undefined	/login/worker-login/worker-handler
+20260310	09:39:54	538b9b28-0f48-4824-a11f-7d97a8e75bf7	POST	undefined	/login/worker-login/worker-handler
+20260311	23:17:52	85ecec1a-17a5-4dda-90e3-1fb52c47ef8f	POST	undefined	/product/upload/upload-handler
+20260311	23:20:53	8c6d71c0-58bc-479b-bcc0-b84cca2685b3	POST	undefined	/product/upload/upload-handler
+20260311	23:29:51	035e8b7e-70df-4b25-9746-a6f3c50d0a39	POST	undefined	/product/upload/upload-handler
+20260311	23:50:27	9f759d18-b271-46db-97bc-06e26d7d357b	POST	undefined	/product/upload/upload-handler
+20260312	00:00:03	6427e11e-0a92-4e15-9ce7-d9a494b85769	POST	undefined	/product/upload/upload-handler

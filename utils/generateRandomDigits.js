@@ -30,4 +30,21 @@ const generateSalesId = () => {
   }
   return `${timeConstraint}${appendRandLetters}${randNumber}`;
 };
-module.exports = { generateMangerRef, generateCustomerId, generateSalesId };
+const generateProdId = () => {
+  const timeConstraint = format(new Date(), "yyss");
+  const randNumber = Math.floor(Math.random() * 1000);
+  const alphabets = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let appendRandLetters = "";
+  for (let i = 0; i < 3; i++) {
+    const randLetter = alphabets.charAt(Math.random() * alphabets.length);
+    appendRandLetters += randLetter;
+  }
+  return `gabcel${timeConstraint}${appendRandLetters}${randNumber}`;
+};
+
+module.exports = {
+  generateMangerRef,
+  generateCustomerId,
+  generateSalesId,
+  generateProdId,
+};

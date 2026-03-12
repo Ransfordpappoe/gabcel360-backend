@@ -101,7 +101,7 @@ const addNewSingleSales = async (req, res) => {
         productImage,
         productDesc,
         price,
-        qty,
+        qty: Number(qty),
         workerDomain,
         createdBy: workerName,
         createdAt: todayDate,
@@ -127,7 +127,7 @@ const addMultipleSales = async (req, res) => {
   if (!sales || !customerId || !Array.isArray(sales) || sales.length === 0) {
     return res.status(400).json({
       message:
-        "Product Purchase registration failed. REASON: sales array is missing or empty.",
+        "Product Purchase registration failed. REASON: insufficient sales details",
     });
   }
 
@@ -224,7 +224,7 @@ const addMultipleSales = async (req, res) => {
           productDesc,
           productImage,
           price,
-          qty,
+          qty: Number(qty),
           workerDomain,
           createdBy: workerName,
           createdAt: todayDate,
