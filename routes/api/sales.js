@@ -5,4 +5,5 @@ router.use("/single-sale", require("./addSingleSale"));
 router.use("/multiple-sale", require("./addMultipleSales"));
 router.use("/delete-sale", require("./deleteSales"));
 router.use("/delete-multiple-sales", require("./deleteMultipleSales"));
+router.use("/ship-items", require("./shipProduct"));
 module.exports = router;

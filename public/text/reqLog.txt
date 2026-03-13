@@ -156,3 +156,6 @@
 20260311	23:29:51	035e8b7e-70df-4b25-9746-a6f3c50d0a39	POST	undefined	/product/upload/upload-handler
 20260311	23:50:27	9f759d18-b271-46db-97bc-06e26d7d357b	POST	undefined	/product/upload/upload-handler
 20260312	00:00:03	6427e11e-0a92-4e15-9ce7-d9a494b85769	POST	undefined	/product/upload/upload-handler
+20260313	16:29:26	3d0c7200-b861-4760-b11e-0d79b4a7dbc4	POST	undefined	/sales/ship-items/shipping-handler
+20260313	16:34:38	574f3297-4693-4ad0-8f47-f2e97af85c50	POST	undefined	/sales/ship-items/shipping-handler
+20260313	16:38:34	02148877-ad5d-49b1-bc69-e21a896acb3c	POST	undefined	/payment/add-payment/add-payment-handler

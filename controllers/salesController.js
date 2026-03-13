@@ -113,7 +113,7 @@ const addNewSingleSales = async (req, res) => {
       });
 
     return res.status(201).json({
-      success: `sales transaction completed successfully ✔️`,
+      success: `sales transaction is successfully registered ✔️`,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -243,7 +243,7 @@ const addMultipleSales = async (req, res) => {
     }
 
     return res.status(201).json({
-      success: `${createdSales.length} sales transactions completed successfully ✔️`,
+      success: `${createdSales.length} sale(s) transaction(s) is successfully registered ✔️`,
       createdSales,
       ...(failedSales.length > 0 && { failedSales }),
     });
@@ -445,9 +445,61 @@ const deleteMultipleSales = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+const handleShippedItems = async (req, res) => {
+  const { customerId, salesId, workerDomain, adminDomain, api_key } = req.body;
+
+  if (!customerId || !salesId || !api_key) {
+    return res.status(400).json({
+      message:
+        "failed to mark product as shipped. REASON: missing important product details.",
+    });
+  }
+
+  const gabcel_api_key = process.env.GABCEL_API_KEY;
+
+  if (api_key !== gabcel_api_key) {
+    return res.status(401).json({ message: "unauthorized domain" });
+  }
+
+  try {
+    const purifyWorkerDomain = sanitizeEmail(workerDomain).toLocaleLowerCase();
+    const purifyAdminDomain = sanitizeEmail(adminDomain).toLocaleLowerCase();
+    const worker_ref = db.ref(
+      `worker/${purifyAdminDomain}/${purifyWorkerDomain}`,
+    );
+    const workersnapshot = await worker_ref.once("value");
+    if (!workersnapshot.exists()) {
+      return res.status(404).json({
+        message:
+          "user not found. cross check your login credential or contact your manager.",
+      });
+    }
+
+    const salesRef = db.ref(`sales/${customerId}/${salesId}`);
+    const salesSnapshot = await salesRef.once("value");
+    if (!salesSnapshot.exists()) {
+      return res.status(404).json({
+        message:
+          "Failed to mark product as shipped. REASON: transaction not found. This transaction may have been deleted or it was incomplete",
+      });
+    }
+
+    await salesRef.update({
+      shipped: true,
+    });
+
+    return res.status(201).json({
+      success: `sales transaction successfully completed and shipped 🚚`,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 module.exports = {
   addNewSingleSales,
   addMultipleSales,
   deleteSales,
   deleteMultipleSales,
+  handleShippedItems,
 };

@@ -80,4 +80,75 @@ const addNewCustomer = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
-module.exports = { addNewCustomer };
+const updateCustomer = async (req, res) => {
+  const {
+    customerName,
+    customerId,
+    contact,
+    whatsapp,
+    email,
+    location,
+    gender,
+    shipped,
+    workerDomain,
+    adminDomain,
+    api_key,
+  } = req.body;
+
+  if (!customerId || !workerDomain || !adminDomain || !api_key) {
+    return res.status(400).json({
+      message:
+        "Update Failed: Missing required customer details or credentials",
+    });
+  }
+
+  const gabcel_api_key = process.env.GABCEL_API_KEY;
+
+  if (api_key !== gabcel_api_key) {
+    return res.status(401).json({ message: "unauthorized domain" });
+  }
+
+  try {
+    const purifyWorkerDomain = sanitizeEmail(workerDomain).toLocaleLowerCase();
+    const purifyAdminDomain = sanitizeEmail(adminDomain).toLocaleLowerCase();
+    const worker_ref = db.ref(
+      `worker/${purifyAdminDomain}/${purifyWorkerDomain}`,
+    );
+    const snapshot = await worker_ref.once("value");
+    if (!snapshot.exists()) {
+      return res.status(404).json({
+        message:
+          "You are not permitted to add new customers. REASON: user not found. cross check your login credential or contact your manager.",
+      });
+    }
+
+    const customersRef = db.ref(
+      `customers/${purifyWorkerDomain}/${customerId}`,
+    );
+
+    const workerCustomersRef = db.ref(`customers/${purifyWorkerDomain}`);
+    const workerCustomersSnapshot = await workerCustomersRef.once("value");
+    if (!workerCustomersSnapshot.exists()) {
+      return res.status(404).json({ message: "Customer not found." });
+    }
+
+    const updateInfo = {};
+
+    if (shipped) updateInfo.shipped = shipped;
+    if (customerName) updateInfo.customerName = customerName;
+    if (contact) updateInfo.contact = contact;
+    if (whatsapp) updateInfo.whatsapp = whatsapp;
+    if (email) updateInfo.email = email;
+    if (gender) updateInfo.gender = gender;
+    if (location) updateInfo.location = location;
+
+    await customersRef.update(updateInfo);
+
+    return res.status(201).json({
+      success: `customer details is successfully updated.`,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+module.exports = { addNewCustomer, updateCustomer };
